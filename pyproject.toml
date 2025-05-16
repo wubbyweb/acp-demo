@@ -1,0 +1,38 @@
+[project]
+name = "acp_courseware_generator_project"
+version = "0.1.0"
+description = "A demonstration project for ACP agent building: A simple courseware generation agent."
+authors = [
+    { name = "Your Name", email = "you@example.com" },
+]
+requires-python = ">=3.11"
+dependencies = [
+    "acp-sdk>=0.9.0", # Specify a version of acp-sdk you are targeting
+    "pydantic-settings>=2.0.0", # For managing settings, e.g., API keys
+    # Add other dependencies like LLM SDKs if you extend this project
+    # "openai>=1.0.0",
+]
+
+[tool.uv.sources]
+# If acp-sdk is a local path dependency (e.g., during development within the acp repo)
+# acp-sdk = { path = "../python", editable = true }
+# Otherwise, uv will fetch it from PyPI as specified in dependencies.
+
+[project.scripts]
+# If you want to define entry points for easier execution
+# run-agent = "course_generation_agent.agent:main" # Assuming a main function in agent.py
+# run-client = "client:main" # Assuming a main function in client.py
+
+[tool.ruff]
+lint.select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "UP", # pyupgrade
+    "I",  # isort
+    "B",  # bugbear
+    "ANN",# flake8-annotations
+    "N",  # pep8-naming
+]
+lint.ignore = ["ANN101", "ANN102", "ANN201", "ANN202"] # Example ignores, adjust as needed
+line-length = 120
