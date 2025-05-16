@@ -10,7 +10,7 @@ dependencies = [
     "acp-sdk>=0.9.0", # Specify a version of acp-sdk you are targeting
     "pydantic-settings>=2.0.0", # For managing settings, e.g., API keys
     # Add other dependencies like LLM SDKs if you extend this project
-    # "openai>=1.0.0",
+     "openai>=1.0.0",
 ]
 
 [tool.uv.sources]

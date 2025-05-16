@@ -1,2 +1,4 @@
 .env
 .venv/
+uv.lock
+.gitignore

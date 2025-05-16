@@ -1,8 +1,31 @@
 import asyncio
 from collections.abc import AsyncGenerator
+import os
+from openai import AsyncOpenAI
+from dotenv import load_dotenv
 
 from acp_sdk.models import Message, MessagePart
 from acp_sdk.server import Context, RunYield, RunYieldResume, Server
+
+load_dotenv()  # Load environment variables from .env file
+# Initialize the OpenAI client
+
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+async def generate_course_content(topic: str) -> dict:
+    """Generate course content using OpenAI."""
+    prompt = f"""Create a detailed course outline for '{topic}'. Include:
+    1. A brief course description
+    2. 5 modules with their titles
+    3. Brief instructor notes for each module
+    Format as JSON with keys: description, modules (array of objects with title and notes)"""
+    
+    response = await client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+    )
+    return eval(response.choices[0].message.content)
 
 # Initialize the ACP server
 server = Server()
@@ -36,23 +59,27 @@ async def course_generator_agent(
     )
     await asyncio.sleep(0.2)
 
-    # Generate course modules - this is a simplified generation logic
-    # A real agent might call an LLM here.
-    modules = [
-        f"Module 1: Introduction to {topic}",
-        f"Module 2: Key Concepts in {topic}",
-        f"Module 3: Practical Applications of {topic}",
-        f"Module 4: Advanced Topics in {topic}",
-        f"Module 5: Conclusion and Future Trends in {topic}",
-    ]
-
-    for module_title in modules:
-        yield MessagePart(content=module_title, content_type="text/plain", role="assistant")
-        await asyncio.sleep(0.1) # Simulate work for each part
-
-    await asyncio.sleep(0.2)
+    # Generate course content using OpenAI
+    course_content = await generate_course_content(topic)
+    
     yield MessagePart(
-        content=f"Further Reading: Suggested texts and resources on {topic}.",
+        content=f"Course Outline for: {topic}\n\n{course_content['description']}",
+        content_type="text/plain",
+        role="assistant"
+    )
+    await asyncio.sleep(0.2)
+
+    # Output each module with its instructor notes
+    for module in course_content['modules']:
+        yield MessagePart(
+            content=f"\n{module['title']}\nInstructor Notes: {module['notes']}",
+            content_type="text/plain",
+            role="assistant"
+        )
+        await asyncio.sleep(0.1)
+
+    yield MessagePart(
+        content="\nNote: This course outline was generated using OpenAI. Feel free to modify it according to your needs.",
         content_type="text/plain",
         role="assistant"
     )
